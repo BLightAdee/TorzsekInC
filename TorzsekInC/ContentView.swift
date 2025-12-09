@@ -4,41 +4,44 @@
 //
 //  Created by BLightAdee on 09.12.2025.
 //
+//
 
 import SwiftUI
 
 struct ContentView: View {
     // Removed @State var n and kRows
-    
-    @State private var ki: [Int] = [0]
-    @State private var kivel: [Int] = [0]
-    @State private var mettol: [Int] = [0]
-    @State private var meddig: [Int] = [0]
+
+    @State private var ki: [Int?] = [nil]
+    @State private var kivel: [Int?] = [nil]
+    @State private var mettol: [Int?] = [nil]
+    @State private var meddig: [Int?] = [nil]
     @State private var wars: [[Int]] = [[0, 0, 0, 0]]
-    
+
     @State private var century: String = ""
-    @State private var torzs: Int = 0
-    @State private var s: Int = 0
+    @State private var torzs: Int? = nil
+    @State private var s: Int? = nil
     @State private var sz: String = "A"
-    @State private var keresett: Int = 0
-    @State private var S: Int = 0
+    @State private var keresett: Int? = nil
+    @State private var S: Int? = nil
     @State private var selectedProblem: Int = 1
     @State private var result: String = ""
-    
+    @State private var showWarning: Bool = false
+    @State private var warningMessage: String = "Please fill in all required fields."
+
     @State private var warsFlatBuffer: [Int32] = []
-    
+
     // Computed property for n (number of tribes)
     var n: Int {
-        let maxKi = ki.max() ?? 0
-        let maxKivel = kivel.max() ?? 0
+        let maxKi = ki.compactMap({ $0 }).max() ?? 0
+        let maxKivel = kivel.compactMap({ $0 }).max() ?? 0
         return max(maxKi, maxKivel)
     }
-    
+
     var k: Int {
         // Number of war records (length of ki or kivel arrays)
         return ki.count
     }
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
@@ -46,48 +49,31 @@ struct ContentView: View {
                     Text("Number of tribes: \(n)")
                         .fontWeight(.semibold)
                 }
-                
+
                 Group {
                     Text("War Records (ki, kivel, mettol, meddig):")
                     ForEach(0..<k, id: \.self) { i in
                         HStack {
-                            TextField("ki", value: Binding<Int>(
-                                get: { ki[i] },
-                                set: { newValue in
-                                    ki[i] = newValue
-                                    syncWarsRow(index: i)
-                                }
-                            ), formatter: NumberFormatter())
-                            .frame(width: 40)
-                            .textFieldStyle(.roundedBorder)
-                            TextField("kivel", value: Binding<Int>(
-                                get: { kivel[i] },
-                                set: { newValue in
-                                    kivel[i] = newValue
-                                    syncWarsRow(index: i)
-                                }
-                            ), formatter: NumberFormatter())
-                            .frame(width: 40)
-                            .textFieldStyle(.roundedBorder)
-                            TextField("mettol", value: Binding<Int>(
-                                get: { mettol[i] },
-                                set: { newValue in
-                                    mettol[i] = newValue
-                                    syncWarsRow(index: i)
-                                }
-                            ), formatter: NumberFormatter())
-                            .frame(width: 60)
-                            .textFieldStyle(.roundedBorder)
-                            TextField("meddig", value: Binding<Int>(
-                                get: { meddig[i] },
-                                set: { newValue in
-                                    meddig[i] = newValue
-                                    syncWarsRow(index: i)
-                                }
-                            ), formatter: NumberFormatter())
-                            .frame(width: 60)
-                            .textFieldStyle(.roundedBorder)
-                            
+                            TextField("ki", text: binding(for: i, array: $ki))
+                                .frame(width: 40)
+                                .textFieldStyle(.roundedBorder)
+                                .onChange(of: ki[i]) { _ in syncWarsRow(index: i) }
+
+                            TextField("kivel", text: binding(for: i, array: $kivel))
+                                .frame(width: 40)
+                                .textFieldStyle(.roundedBorder)
+                                .onChange(of: kivel[i]) { _ in syncWarsRow(index: i) }
+
+                            TextField("mettol", text: binding(for: i, array: $mettol))
+                                .frame(width: 60)
+                                .textFieldStyle(.roundedBorder)
+                                .onChange(of: mettol[i]) { _ in syncWarsRow(index: i) }
+
+                            TextField("meddig", text: binding(for: i, array: $meddig))
+                                .frame(width: 60)
+                                .textFieldStyle(.roundedBorder)
+                                .onChange(of: meddig[i]) { _ in syncWarsRow(index: i) }
+
                             if k > 1 {
                                 Button(action: {
                                     removeRow(at: i)
@@ -108,7 +94,7 @@ struct ContentView: View {
                     }
                     .padding(.top, 5)
                 }
-                
+
                 Divider()
                 Text("Select Problem to Run:")
                 Picker("Problem", selection: $selectedProblem) {
@@ -122,7 +108,7 @@ struct ContentView: View {
                     Text("15. Shortest war for a tribe").tag(15)
                 }
                 .pickerStyle(.menu)
-                
+
                 if selectedProblem == 1 {
                     Text("Century (roman numeral, e.g., 'IX'): ")
                     TextField("Century", text: $century)
@@ -132,7 +118,7 @@ struct ContentView: View {
                 if selectedProblem == 11 {
                     HStack {
                         Text("torzs (problem 11):")
-                        TextField("torzs", value: $torzs, formatter: NumberFormatter())
+                        TextField("torzs", text: optionalIntBinding($torzs))
                             .frame(width: 40)
                             .textFieldStyle(.roundedBorder)
                     }
@@ -140,7 +126,7 @@ struct ContentView: View {
                 if selectedProblem == 12 {
                     HStack {
                         Text("s (problem 12):")
-                        TextField("s", value: $s, formatter: NumberFormatter())
+                        TextField("s", text: optionalIntBinding($s))
                             .frame(width: 40)
                             .textFieldStyle(.roundedBorder)
                         Text("sz (A/B/C):")
@@ -152,7 +138,7 @@ struct ContentView: View {
                 if selectedProblem == 13 {
                     HStack {
                         Text("keresett (problem 13):")
-                        TextField("keresett", value: $keresett, formatter: NumberFormatter())
+                        TextField("keresett", text: optionalIntBinding($keresett))
                             .frame(width: 40)
                             .textFieldStyle(.roundedBorder)
                     }
@@ -160,17 +146,26 @@ struct ContentView: View {
                 if selectedProblem == 14 || selectedProblem == 15 {
                     HStack {
                         Text("S (problems 14/15):")
-                        TextField("S", value: $S, formatter: NumberFormatter())
+                        TextField("S", text: optionalIntBinding($S))
                             .frame(width: 40)
                             .textFieldStyle(.roundedBorder)
                     }
                 }
-                
+
                 Button("Run") {
-                    result = runSelectedProblem()
+                    if validateInputs() {
+                        result = runSelectedProblem()
+                    } else {
+                        showWarning = true
+                    }
                 }
                 .padding(.top, 10)
-                
+                .alert(isPresented: $showWarning) {
+                    Alert(
+                        title: Text("Missing Input"), message: Text(warningMessage),
+                        dismissButton: .default(Text("OK")))
+                }
+
                 Divider()
                 Text("Result:").font(.headline)
                 Text(result)
@@ -181,16 +176,108 @@ struct ContentView: View {
         }
         .frame(minWidth: 600, minHeight: 700)
     }
-    
+
+    // MARK: - Binding Helpers
+
+    private func binding(for index: Int, array: Binding<[Int?]>) -> Binding<String> {
+        return Binding<String>(
+            get: {
+                if index < array.wrappedValue.count, let value = array.wrappedValue[index] {
+                    return String(value)
+                }
+                return ""
+            },
+            set: { newValue in
+                let filtered = newValue.filter { "0123456789".contains($0) }
+                if let intValue = Int(filtered) {
+                    if index < array.wrappedValue.count {
+                        array.wrappedValue[index] = intValue
+                    }
+                } else {
+                    if index < array.wrappedValue.count {
+                        array.wrappedValue[index] = nil
+                    }
+                }
+            }
+        )
+    }
+
+    private func optionalIntBinding(_ value: Binding<Int?>) -> Binding<String> {
+        return Binding<String>(
+            get: {
+                if let v = value.wrappedValue {
+                    return String(v)
+                }
+                return ""
+            },
+            set: { newValue in
+                let filtered = newValue.filter { "0123456789".contains($0) }
+                if let intValue = Int(filtered) {
+                    value.wrappedValue = intValue
+                } else {
+                    value.wrappedValue = nil
+                }
+            }
+        )
+    }
+
+    // MARK: - Validation
+    private func validateInputs() -> Bool {
+        // Validate table rows
+        for i in 0..<k {
+            if ki[i] == nil || kivel[i] == nil || mettol[i] == nil || meddig[i] == nil {
+                warningMessage = "Please fill in all values in the War Records table."
+                return false
+            }
+        }
+
+        // Validate problem specifics
+        switch selectedProblem {
+        case 1:
+            if century.isEmpty {
+                warningMessage = "Please enter a century."
+                return false
+            }
+        case 11:
+            if torzs == nil {
+                warningMessage = "Please enter 'torzs'."
+                return false
+            }
+        case 12:
+            if s == nil {
+                warningMessage = "Please enter 's'."
+                return false
+            }
+            if sz.isEmpty {
+                warningMessage = "Please enter 'sz'."
+                return false
+            }
+        case 13:
+            if keresett == nil {
+                warningMessage = "Please enter 'keresett'."
+                return false
+            }
+        case 15, 14:
+            if S == nil {
+                warningMessage = "Please enter 'S'."
+                return false
+            }
+        default:
+            break
+        }
+
+        return true
+    }
+
     // MARK: - Row management
     private func addRow() {
-        ki.append(0)
-        kivel.append(0)
-        mettol.append(0)
-        meddig.append(0)
+        ki.append(nil)
+        kivel.append(nil)
+        mettol.append(nil)
+        meddig.append(nil)
         wars.append([0, 0, 0, 0])
     }
-    
+
     private func removeRow(at index: Int) {
         guard ki.count > 1 else { return }
         ki.remove(at: index)
@@ -199,58 +286,94 @@ struct ContentView: View {
         meddig.remove(at: index)
         wars.remove(at: index)
     }
-    
+
     // Synchronize wars array row with individual arrays
+    // We default nil to 0 in the wars cache just to keep structure, but we rely on validation before use.
     private func syncWarsRow(index: Int) {
+        let v_ki = ki[index] ?? 0
+        let v_kivel = kivel[index] ?? 0
+        let v_mettol = mettol[index] ?? 0
+        let v_meddig = meddig[index] ?? 0
+
         if index < wars.count {
-            wars[index][0] = ki[index]
-            wars[index][1] = kivel[index]
-            wars[index][2] = mettol[index]
-            wars[index][3] = meddig[index]
+            wars[index][0] = v_ki
+            wars[index][1] = v_kivel
+            wars[index][2] = v_mettol
+            wars[index][3] = v_meddig
         } else if index == wars.count {
-            wars.append([ki[index], kivel[index], mettol[index], meddig[index]])
+            wars.append([v_ki, v_kivel, v_mettol, v_meddig])
         }
     }
-    
+
     // MARK: - Call C++ functions
     func runSelectedProblem() -> String {
+        // Force unwrap safe arrays because validation passed
+        let safeKi = ki.compactMap { $0! }
+        let safeKivel = kivel.compactMap { $0! }
+        let safeMettol = mettol.compactMap { $0! }
+        let safeMeddig = meddig.compactMap { $0! }
+
         switch selectedProblem {
         case 1:
             // int haboruIdotartamAdottSzazad(int n, int k, const int wars[][4], const char *century)
             return String(haboruIdotartamAdottSzazad(Int32(n), Int32(k), asWarsCArray(), century))
         case 6:
-            return String(csak_egyszer_haborozu_torzs(Int32(k), asInt32Array(ki), asInt32Array(kivel)))
+            return String(
+                csak_egyszer_haborozu_torzs(Int32(k), asInt32Array(safeKi), asInt32Array(safeKivel))
+            )
         case 8:
-            return String(egy_evnel_rovhab(Int32(k), asInt32Array(mettol), asInt32Array(meddig)))
+            return String(
+                egy_evnel_rovhab(Int32(k), asInt32Array(safeMettol), asInt32Array(safeMeddig)))
         case 11:
-            return String(haboruPerTorzs(Int32(n), Int32(k), asInt32Array(ki), asInt32Array(kivel), asInt32Array(mettol), asInt32Array(meddig), Int32(torzs)))
+            return String(
+                haboruPerTorzs(
+                    Int32(n), Int32(k), asInt32Array(safeKi), asInt32Array(safeKivel),
+                    asInt32Array(safeMettol), asInt32Array(safeMeddig), Int32(torzs!)))
         case 12:
-            guard let szChar = sz.uppercased().first else { return "Block selector (sz) required (A/B/C)" }
+            guard let szChar = sz.uppercased().first else {
+                return "Block selector (sz) required (A/B/C)"
+            }
             let cChar = CChar(szChar.asciiValue!)
-            return String(calculateWarYears(Int32(n), Int32(k), asInt32Array(ki), asInt32Array(kivel), asInt32Array(mettol), asInt32Array(meddig), Int32(s), cChar))
+            return String(
+                calculateWarYears(
+                    Int32(n), Int32(k), asInt32Array(safeKi), asInt32Array(safeKivel),
+                    asInt32Array(safeMettol), asInt32Array(safeMeddig), Int32(s!), cChar))
         case 13:
-            var eleje: Int32 = 0, vege: Int32 = 0
-            let ok = calculatePeacePeriod(Int32(n), Int32(k), asInt32Array(ki), asInt32Array(kivel), asInt32Array(mettol), asInt32Array(meddig), Int32(keresett), &eleje, &vege)
+            var eleje: Int32 = 0
+            var vege: Int32 = 0
+            let ok = calculatePeacePeriod(
+                Int32(n), Int32(k), asInt32Array(safeKi), asInt32Array(safeKivel),
+                asInt32Array(safeMettol), asInt32Array(safeMeddig), Int32(keresett!), &eleje, &vege)
             if ok == 0 { return "0 0" } else { return "\(eleje) \(vege)" }
         case 14:
-            var ellenfel: Int32 = 0, kezd: Int32 = 0, veg: Int32 = 0
-            let ok = findLongestWar(Int32(n), Int32(k), asInt32Array(ki), asInt32Array(kivel), asInt32Array(mettol), asInt32Array(meddig), Int32(S), &ellenfel, &kezd, &veg)
+            var ellenfel: Int32 = 0
+            var kezd: Int32 = 0
+            var veg: Int32 = 0
+            let ok = findLongestWar(
+                Int32(n), Int32(k), asInt32Array(safeKi), asInt32Array(safeKivel),
+                asInt32Array(safeMettol), asInt32Array(safeMeddig), Int32(S!), &ellenfel, &kezd,
+                &veg)
             if ok == 0 { return "0 0 0" } else { return "\(ellenfel) \(kezd) \(veg)" }
         case 15:
-            var ellenfel: Int32 = 0, kezd: Int32 = 0, veg: Int32 = 0
-            let ok = findShortestWar(Int32(n), Int32(k), asInt32Array(ki), asInt32Array(kivel), asInt32Array(mettol), asInt32Array(meddig), Int32(S), &ellenfel, &kezd, &veg)
+            var ellenfel: Int32 = 0
+            var kezd: Int32 = 0
+            var veg: Int32 = 0
+            let ok = findShortestWar(
+                Int32(n), Int32(k), asInt32Array(safeKi), asInt32Array(safeKivel),
+                asInt32Array(safeMettol), asInt32Array(safeMeddig), Int32(S!), &ellenfel, &kezd,
+                &veg)
             if ok == 0 { return "0 0 0" } else { return "\(ellenfel) \(kezd) \(veg)" }
         default:
             return "Not implemented."
         }
     }
-    
+
     // MARK: - C bridging helpers
     func asInt32Array(_ arr: [Int]) -> UnsafePointer<Int32> {
         let buffer = arr.map { Int32($0) }
         return UnsafePointer(buffer)
     }
-    
+
     func asWarsCArray() -> UnsafePointer<(Int32, Int32, Int32, Int32)> {
         // Make sure wars matches ki.count
         if wars.count < k {
@@ -259,7 +382,8 @@ struct ContentView: View {
             wars = Array(wars.prefix(k))
         }
         warsFlatBuffer = wars.flatMap { $0.prefix(4).map { Int32($0) } }
-        let tuplePtr = warsFlatBuffer.withUnsafeBufferPointer { ptr -> UnsafePointer<(Int32, Int32, Int32, Int32)> in
+        let tuplePtr = warsFlatBuffer.withUnsafeBufferPointer {
+            ptr -> UnsafePointer<(Int32, Int32, Int32, Int32)> in
             unsafeBitCast(ptr.baseAddress, to: UnsafePointer<(Int32, Int32, Int32, Int32)>.self)
         }
         return tuplePtr

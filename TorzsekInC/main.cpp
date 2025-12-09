@@ -9,7 +9,7 @@
 #include <cmath>
 
 // 1. Helpers and Problem 1
-inline int romanCenturyDecode(const char *a) {
+int romanCenturyDecode(const char *a) {
     int decodedNum = 0;
     if (!a) return 0;
     for (size_t i = 0; a[i] != '\0'; i++) {
@@ -30,7 +30,7 @@ inline int romanCenturyDecode(const char *a) {
     return decodedNum;
 }
 
-inline int haboruIdotartamAdottSzazad(int /*n*/, int k, const int wars[][4], const char *century) {
+int haboruIdotartamAdottSzazad(int /*n*/, int k, const int wars[][4], const char *century) {
     int maxWar = 0;
     int targetCentury = romanCenturyDecode(century);
     for (int i = 0; i < k; i++) {
@@ -47,7 +47,7 @@ inline int haboruIdotartamAdottSzazad(int /*n*/, int k, const int wars[][4], con
 }
 
 // 6. Exactly-once warring tribe (no I/O)
-inline int csak_egyszer_haborozu_torzs(int k, const int ki[], const int kivel[]) {
+int csak_egyszer_haborozu_torzs(int k, const int ki[], const int kivel[]) {
     long long t[9] = {0};
     for (int i = 0; i < k; i++) {
         if (ki[i] >= 0 && ki[i] < 9) t[ki[i]]++;
@@ -60,7 +60,7 @@ inline int csak_egyszer_haborozu_torzs(int k, const int ki[], const int kivel[])
 }
 
 // 8. Count wars shorter than one year (no I/O)
-inline int egy_evnel_rovhab(int k, const int mettol[], const int meddig[]) {
+int egy_evnel_rovhab(int k, const int mettol[], const int meddig[]) {
     int h = 0;
     for (int i = 0; i < k; i++) {
         int g = meddig[i] - mettol[i];
@@ -70,7 +70,7 @@ inline int egy_evnel_rovhab(int k, const int mettol[], const int meddig[]) {
 }
 
 // 11. Number of wars for a tribe
-inline int haboruPerTorzs(int /*N*/, int K, const int ki[], const int kivel[], const int /*mettol*/[], const int /*meddig*/[], int torzs) {
+int haboruPerTorzs(int /*N*/, int K, const int ki[], const int kivel[], const int /*mettol*/[], const int /*meddig*/[], int torzs) {
     int db = 0;
     for (int i = 0; i < K; i++) {
         if (ki[i] == torzs || kivel[i] == torzs)
@@ -80,7 +80,7 @@ inline int haboruPerTorzs(int /*N*/, int K, const int ki[], const int kivel[], c
 }
 
 // 12. Total war years for a tribe in a given century block
-inline int calculateWarYears(int /*n*/, int k, const int ki[], const int kivel[], const int mettol[], const int meddig[], int s, char sz) {
+int calculateWarYears(int /*n*/, int k, const int ki[], const int kivel[], const int mettol[], const int meddig[], int s, char sz) {
     int kezd, veg;
     if (sz == 'A') {
         kezd = 1601;
@@ -119,7 +119,7 @@ inline int calculateWarYears(int /*n*/, int k, const int ki[], const int kivel[]
 }
 
 // 13. Longest peace period borders for a tribe
-inline int calculatePeacePeriod(int /*torzsek*/, int haboruk, const int ki[], const int kivel[], const int mettol[], const int meddig[], int keresett, int *outEleje, int *outVege) {
+int calculatePeacePeriod(int /*torzsek*/, int haboruk, const int ki[], const int kivel[], const int mettol[], const int meddig[], int keresett, int *outEleje, int *outVege) {
     int kezdet[2000], veg[2000];
     int db = 0;
 
@@ -187,7 +187,7 @@ inline int calculatePeacePeriod(int /*torzsek*/, int haboruk, const int ki[], co
 }
 
 // 14. Longest war for a tribe
-inline int findLongestWar(int /*N*/, int K, const int ki[], const int kivel[], const int mettol[], const int meddig[], int S, int *outEllenfel, int *outKezd, int *outVeg) {
+int findLongestWar(int /*N*/, int K, const int ki[], const int kivel[], const int mettol[], const int meddig[], int S, int *outEllenfel, int *outKezd, int *outVeg) {
     int maxHossz = -1, maxEllenfel = 0, kezd = 0, veg = 0;
 
     for (int i = 0; i < K; i++) {
@@ -222,7 +222,7 @@ inline int findLongestWar(int /*N*/, int K, const int ki[], const int kivel[], c
 }
 
 // 15. Shortest war for a tribe
-inline int findShortestWar(int /*N*/, int K, const int ki[], const int kivel[], const int mettol[], const int meddig[], int S, int *outEllenfel, int *outKezd, int *outVeg) {
+int findShortestWar(int /*N*/, int K, const int ki[], const int kivel[], const int mettol[], const int meddig[], int S, int *outEllenfel, int *outKezd, int *outVeg) {
     int minHossz = 1000000000, minEllenfel = 0, kezd = 0, veg = 0;
 
     for (int i = 0; i < K; i++) {
@@ -255,3 +255,4 @@ inline int findShortestWar(int /*N*/, int K, const int ki[], const int kivel[], 
         return 1;
     }
 }
+

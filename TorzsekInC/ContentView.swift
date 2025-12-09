@@ -30,6 +30,8 @@ struct ContentView: View {
 
     @State private var warsFlatBuffer: [Int32] = []
 
+    @State private var showHelp: Bool = false
+
     // Computed property for n (number of tribes)
     var n: Int {
         let maxKi = ki.compactMap({ $0 }).max() ?? 0
@@ -42,6 +44,34 @@ struct ContentView: View {
         return ki.count
     }
 
+    func getProblemDescription(id: Int) -> String {
+        switch id {
+        case 1:
+            return
+                "Calculates the maximum duration of a war within the given century. Returns the duration in years."
+        case 6:
+            return
+                "Identifies the tribe that has participated in exactly one war. Returns the Tribe ID."
+        case 8: return "Identifies wars shorter than 1 year. Returns the result."
+        case 11:
+            return
+                "Counts the number of wars the specified tribe participated in. Returns the count."
+        case 12:
+            return
+                "Calculates the total time spent in war by a tribe in a given century. Returns the total years."
+        case 13:
+            return
+                "Calculates the longest peace period for the specified tribe. Returns the start and end year of the period."
+        case 14:
+            return
+                "Finds the longest war for the specified tribe. Returns the opponent ID, start year, and end year."
+        case 15:
+            return
+                "Finds the shortest war for the specified tribe. Returns the opponent ID, start year, and end year."
+        default: return "Description pending."
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
@@ -51,26 +81,30 @@ struct ContentView: View {
                 }
 
                 Group {
-                    Text("War Records (ki, kivel, mettol, meddig):")
+                    Text("War Records (Tribe 1, Tribe 2, Start Date, End Date):")
                     ForEach(0..<k, id: \.self) { i in
                         HStack {
-                            TextField("ki", text: binding(for: i, array: $ki))
-                                .frame(width: 40)
+                            TextField("Tribe 1", text: binding(for: i, array: $ki))
+                                .frame(width: 80)
+                                .multilineTextAlignment(.center)
                                 .textFieldStyle(.roundedBorder)
                                 .onChange(of: ki[i]) { _ in syncWarsRow(index: i) }
 
-                            TextField("kivel", text: binding(for: i, array: $kivel))
-                                .frame(width: 40)
+                            TextField("Tribe 2", text: binding(for: i, array: $kivel))
+                                .frame(width: 80)
+                                .multilineTextAlignment(.center)
                                 .textFieldStyle(.roundedBorder)
                                 .onChange(of: kivel[i]) { _ in syncWarsRow(index: i) }
 
-                            TextField("mettol", text: binding(for: i, array: $mettol))
-                                .frame(width: 60)
+                            TextField("Start Date", text: binding(for: i, array: $mettol))
+                                .frame(width: 80)
+                                .multilineTextAlignment(.center)
                                 .textFieldStyle(.roundedBorder)
                                 .onChange(of: mettol[i]) { _ in syncWarsRow(index: i) }
 
-                            TextField("meddig", text: binding(for: i, array: $meddig))
-                                .frame(width: 60)
+                            TextField("End Date", text: binding(for: i, array: $meddig))
+                                .frame(width: 80)
+                                .multilineTextAlignment(.center)
                                 .textFieldStyle(.roundedBorder)
                                 .onChange(of: meddig[i]) { _ in syncWarsRow(index: i) }
 
@@ -81,7 +115,7 @@ struct ContentView: View {
                                     Image(systemName: "minus.circle.fill")
                                         .foregroundColor(.red)
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(.bordered)
                                 .padding(.leading, 8)
                             }
                         }
@@ -97,57 +131,72 @@ struct ContentView: View {
 
                 Divider()
                 Text("Select Problem to Run:")
-                Picker("Problem", selection: $selectedProblem) {
-                    Text("1. Max war length in century").tag(1)
-                    Text("6. Exactly-once warring tribe").tag(6)
-                    Text("8. Wars shorter than 1 year").tag(8)
-                    Text("11. Number of wars for a tribe").tag(11)
-                    Text("12. Total war years for a tribe/block").tag(12)
-                    Text("13. Longest peace period for a tribe").tag(13)
-                    Text("14. Longest war for a tribe").tag(14)
-                    Text("15. Shortest war for a tribe").tag(15)
+                HStack {
+                    Picker("Problem", selection: $selectedProblem) {
+                        Text("1. Max war length in century").tag(1)
+                        Text("6. Exactly-once warring tribe").tag(6)
+                        Text("8. Wars shorter than 1 year").tag(8)
+                        Text("11. Number of wars for a tribe").tag(11)
+                        Text("12. Total war years for a tribe/century").tag(12)
+                        Text("13. Longest peace period for a tribe").tag(13)
+                        Text("14. Longest war for a tribe").tag(14)
+                        Text("15. Shortest war for a tribe").tag(15)
+                    }
+                    .pickerStyle(.menu)
+
+                    Button(action: {
+                        showHelp.toggle()
+                    }) {
+                        Image(systemName: "questionmark.circle")
+                            .foregroundColor(.blue)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Show problem description")
+                    .popover(isPresented: $showHelp) {
+                        Text(getProblemDescription(id: selectedProblem))
+                            .padding()
+                            .frame(width: 300)
+                    }
                 }
-                .pickerStyle(.menu)
 
                 if selectedProblem == 1 {
-                    Text("Century (roman numeral, e.g., 'IX'): ")
+                    Text("Century to check (roman numeral, e.g., 'IX'): ")
                     TextField("Century", text: $century)
                         .frame(width: 120)
                         .textFieldStyle(.roundedBorder)
                 }
                 if selectedProblem == 11 {
                     HStack {
-                        Text("torzs (problem 11):")
-                        TextField("torzs", text: optionalIntBinding($torzs))
-                            .frame(width: 40)
+                        Text("Tribe to check:")
+                        TextField("Tribe ID", text: optionalIntBinding($torzs))
+                            .frame(width: 60)
                             .textFieldStyle(.roundedBorder)
                     }
                 }
                 if selectedProblem == 12 {
-                    HStack {
-                        Text("s (problem 12):")
-                        TextField("s", text: optionalIntBinding($s))
-                            .frame(width: 40)
+                        Text("Tribe to check:")
+                        TextField("Tribe ID", text: optionalIntBinding($s))
+                            .frame(width: 120)
                             .textFieldStyle(.roundedBorder)
-                        Text("sz (A/B/C):")
+                        Text("Century to check (roman numeral, e.g., 'IX'):")
                         TextField("sz", text: $sz)
-                            .frame(width: 30)
+                            .frame(width: 120)
                             .textFieldStyle(.roundedBorder)
-                    }
+                    
                 }
                 if selectedProblem == 13 {
                     HStack {
-                        Text("keresett (problem 13):")
-                        TextField("keresett", text: optionalIntBinding($keresett))
-                            .frame(width: 40)
+                        Text("Tribe to check:")
+                        TextField("Tribe ID", text: optionalIntBinding($keresett))
+                            .frame(width: 60)
                             .textFieldStyle(.roundedBorder)
                     }
                 }
                 if selectedProblem == 14 || selectedProblem == 15 {
                     HStack {
-                        Text("S (problems 14/15):")
-                        TextField("S", text: optionalIntBinding($S))
-                            .frame(width: 40)
+                        Text("Tribe to check:")
+                        TextField("Tribe ID", text: optionalIntBinding($S))
+                            .frame(width: 60)
                             .textFieldStyle(.roundedBorder)
                     }
                 }
@@ -159,6 +208,8 @@ struct ContentView: View {
                         showWarning = true
                     }
                 }
+                .buttonStyle(.borderedProminent)
+                //.foregroundColor(Color(.systemGreen))
                 .padding(.top, 10)
                 .alert(isPresented: $showWarning) {
                     Alert(
@@ -174,7 +225,7 @@ struct ContentView: View {
             }
             .padding()
         }
-        .frame(minWidth: 600, minHeight: 700)
+        .frame(minWidth: 600, minHeight: 500)
     }
 
     // MARK: - Binding Helpers

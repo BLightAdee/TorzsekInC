@@ -20,7 +20,7 @@ struct ContentView: View {
     @State private var century: String = ""
     @State private var torzs: Int? = nil
     @State private var s: Int? = nil
-    @State private var sz: String = "A"
+    @State private var sz: String = ""
     @State private var keresett: Int? = nil
     @State private var S: Int? = nil
     @State private var selectedProblem: Int = 1
@@ -179,7 +179,7 @@ struct ContentView: View {
                             .frame(width: 120)
                             .textFieldStyle(.roundedBorder)
                         Text("Century to check (roman numeral, e.g., 'IX'):")
-                        TextField("sz", text: $sz)
+                        TextField("Century", text: $sz)
                             .frame(width: 120)
                             .textFieldStyle(.roundedBorder)
                     
@@ -291,26 +291,26 @@ struct ContentView: View {
             }
         case 11:
             if torzs == nil {
-                warningMessage = "Please enter 'torzs'."
+                warningMessage = "Please enter a Tribe ID."
                 return false
             }
         case 12:
             if s == nil {
-                warningMessage = "Please enter 's'."
+                warningMessage = "Please enter a Tribe ID."
                 return false
             }
             if sz.isEmpty {
-                warningMessage = "Please enter 'sz'."
+                warningMessage = "Please enter a century."
                 return false
             }
         case 13:
             if keresett == nil {
-                warningMessage = "Please enter 'keresett'."
+                warningMessage = "Please enter a Tribe ID."
                 return false
             }
         case 15, 14:
             if S == nil {
-                warningMessage = "Please enter 'S'."
+                warningMessage = "Please enter a Tribe."
                 return false
             }
         default:
